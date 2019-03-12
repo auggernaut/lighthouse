@@ -124,9 +124,9 @@ describe('DOM', () => {
       assert.equal(result.innerHTML, '<a rel="noopener" target="_blank" href="https://developers.google.com/web/tools/lighthouse/audits/description?utm_source=lighthouse&amp;utm_medium=someChannel">Learn more</a>.');
 
       result = dom.convertMarkdownLinkSnippets(text, {
-        rating: 'fail',
+        rating: 'pass',
       });
-      assert.equal(result.innerHTML, '<a rel="noopener" target="_blank" href="https://developers.google.com/web/tools/lighthouse/audits/description?utm_source=lighthouse&amp;utm_medium=someChannel&amp;utm_content=fail">Learn more</a>.');
+      assert.equal(result.innerHTML, '<a rel="noopener" target="_blank" href="https://developers.google.com/web/tools/lighthouse/audits/description?utm_source=lighthouse&amp;utm_medium=someChannel&amp;utm_content=pass">Learn more</a>.');
     });
 
     it('doesn\'t append utm params to non https://developers.google.com origins', () => {
