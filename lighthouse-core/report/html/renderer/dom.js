@@ -28,7 +28,7 @@ class DOM {
     /** @type {Document} */
     this._document = document;
     /** @type {string} */
-    this._lighthouseChannel = '';
+    this._lighthouseChannel = 'unknown';
   }
 
   /**
