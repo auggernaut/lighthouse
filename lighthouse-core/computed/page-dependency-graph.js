@@ -309,9 +309,7 @@ class PageDependencyGraph {
       return str + padChar.repeat(Math.max(target - str.length, 0));
     }
 
-    /** @type {Array<Node>} */
-    const nodes = [];
-    rootNode.traverse(node => nodes.push(node));
+    const nodes = [...rootNode.traverse()];
     nodes.sort((a, b) => a.startTime - b.startTime);
 
     const min = nodes[0].startTime;

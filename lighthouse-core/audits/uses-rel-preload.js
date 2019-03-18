@@ -52,13 +52,13 @@ class UsesRelPreloadAudit extends Audit {
     /** @type {Set<string>} */
     const urls = new Set();
 
-    graph.traverse((node, traversalPath) => {
-      if (node.type !== 'network') return;
+    for (const [traversalPath, node] of graph.traverseEntries()) {
+      if (node.type !== 'network') continue;
       // Don't include the node itself or any CPU nodes in the initiatorPath
       const path = traversalPath.slice(1).filter(initiator => initiator.type === 'network');
-      if (!UsesRelPreloadAudit.shouldPreloadRequest(node.record, mainResource, path)) return;
+      if (!UsesRelPreloadAudit.shouldPreloadRequest(node.record, mainResource, path)) continue;
       urls.add(node.record.url);
-    });
+    }
 
     return urls;
   }
@@ -72,7 +72,9 @@ class UsesRelPreloadAudit extends Audit {
   static getURLsFailedToPreload(graph) {
     /** @type {Array<LH.Artifacts.NetworkRequest>} */
     const requests = [];
-    graph.traverse(node => node.type === 'network' && requests.push(node.record));
+    for (const node of graph.traverse()) {
+      if (node.type === 'network') requests.push(node.record);
+    }
 
     const preloadRequests = requests.filter(req => req.isLinkPreload);
     const preloadURLs = new Set(preloadRequests.map(req => req.url));
@@ -130,16 +132,15 @@ class UsesRelPreloadAudit extends Audit {
     const nodesToPreload = [];
     /** @type {LH.Gatherer.Simulation.GraphNode|null} */
     let mainDocumentNode = null;
-    modifiedGraph.traverse(node => {
-      if (node.type !== 'network') return;
+    for (const node of modifiedGraph.traverse()) {
+      if (node.type !== 'network') continue;
 
-      const networkNode = /** @type {LH.Gatherer.Simulation.GraphNetworkNode} */ (node);
       if (node.isMainDocument()) {
-        mainDocumentNode = networkNode;
-      } else if (networkNode.record && urls.has(networkNode.record.url)) {
-        nodesToPreload.push(networkNode);
+        mainDocumentNode = node;
+      } else if (node.record && urls.has(node.record.url)) {
+        nodesToPreload.push(node);
       }
-    });
+    }
 
     if (!mainDocumentNode) {
       // Should always find the main document node

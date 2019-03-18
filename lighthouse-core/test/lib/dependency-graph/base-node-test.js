@@ -140,10 +140,12 @@ describe('DependencyGraph/Node', () => {
       const clone = graph.nodeA.cloneWithRelationships();
 
       const clonedIdMap = new Map();
-      clone.traverse(node => clonedIdMap.set(node.id, node));
+      for (const node of clone.traverse()) {
+        clonedIdMap.set(node.id, node);
+      }
       assert.equal(clonedIdMap.size, 8);
 
-      graph.nodeA.traverse(node => {
+      for (const node of graph.nodeA.traverse()) {
         const clone = clonedIdMap.get(node.id);
         assert.equal(clone.id, node.id);
         assert.notEqual(clone, node);
@@ -155,7 +157,7 @@ describe('DependencyGraph/Node', () => {
           assert.equal(cloneDependent.id, originalDependent.id);
           assert.notEqual(cloneDependent, originalDependent);
         });
-      });
+      }
     });
 
     it('should create a copy of a graph with long dependency chains', () => {
@@ -180,7 +182,9 @@ describe('DependencyGraph/Node', () => {
       const clone = nodeA.cloneWithRelationships();
 
       const clonedIdMap = new Map();
-      clone.traverse(node => clonedIdMap.set(node.id, node));
+      for (const node of clone.traverse()) {
+        clonedIdMap.set(node.id, node);
+      }
       assert.equal(clonedIdMap.size, 6);
     });
 
@@ -197,7 +201,9 @@ describe('DependencyGraph/Node', () => {
       const clone = graph.nodeA.cloneWithRelationships(node => node.id === 'F');
 
       const clonedIdMap = new Map();
-      clone.traverse(node => clonedIdMap.set(node.id, node));
+      for (const node of clone.traverse()) {
+        clonedIdMap.set(node.id, node);
+      }
 
       assert.equal(clonedIdMap.size, 6);
       assert.ok(clonedIdMap.has('F'), 'did not include target node');
@@ -213,7 +219,10 @@ describe('DependencyGraph/Node', () => {
     it('should visit every dependent node', () => {
       const graph = createComplexGraph();
       const ids = [];
-      graph.nodeA.traverse(node => ids.push(node.id));
+
+      for (const node of graph.nodeA.traverse()) {
+        ids.push(node.id);
+      }
 
       assert.deepEqual(ids, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
     });
@@ -221,10 +230,13 @@ describe('DependencyGraph/Node', () => {
     it('should respect getNext', () => {
       const graph = createComplexGraph();
       const ids = [];
-      graph.nodeF.traverse(
-        node => ids.push(node.id),
+
+      const dependencyTraversal = graph.nodeF.traverse(
         node => node.getDependencies()
       );
+      for (const node of dependencyTraversal) {
+        ids.push(node.id);
+      }
 
       assert.deepEqual(ids, ['F', 'E', 'D', 'B', 'C', 'A']);
     });

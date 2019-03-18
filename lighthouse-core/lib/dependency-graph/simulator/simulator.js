@@ -86,11 +86,11 @@ class Simulator {
   _initializeConnectionPool(graph) {
     /** @type {LH.Artifacts.NetworkRequest[]} */
     const records = [];
-    graph.getRootNode().traverse(node => {
+    for (const node of graph.getRootNode().traverse()) {
       if (node.type === BaseNode.TYPES.NETWORK) {
         records.push(node.record);
       }
-    });
+    }
 
     this._connectionPool = new ConnectionPool(records, this._options);
   }
@@ -441,7 +441,9 @@ class Simulator {
     const nodesInProgress = this._nodes[NodeState.InProgress];
 
     const rootNode = graph.getRootNode();
-    rootNode.traverse(node => nodesNotReadyToStart.add(node));
+    for (const node of rootNode.traverse()) {
+      nodesNotReadyToStart.add(node);
+    }
     let totalElapsedTime = 0;
     let iteration = 0;
 

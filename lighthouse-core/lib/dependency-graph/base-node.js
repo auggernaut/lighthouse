@@ -180,84 +180,85 @@ class BaseNode {
     let shouldIncludeNode = () => true;
     if (predicate) {
       const idsToInclude = new Set();
-      rootNode.traverse(node => {
-        if (predicate(node)) {
-          node.traverse(
-            node => idsToInclude.add(node.id),
-            node => node._dependencies.filter(parent => !idsToInclude.has(parent))
-          );
+      // Walk down dependents, looking for any that pass the predicate.
+      for (const node of rootNode.traverse()) {
+        if (!predicate(node)) continue;
+
+        // Walk back up dependencies, adding all nodes in the path to this one to the inclusion list.
+        const traverseDependencies = node.traverse(node => node.getDependencies());
+        for (const depNode of traverseDependencies) {
+          idsToInclude.add(depNode.id);
         }
-      });
+      }
 
       shouldIncludeNode = node => idsToInclude.has(node.id);
     }
 
     const idToNodeMap = new Map();
-    rootNode.traverse(originalNode => {
-      if (!shouldIncludeNode(originalNode)) return;
-      const clonedNode = originalNode.cloneWithoutRelationships();
+    for (const node of rootNode.traverse()) {
+      if (!shouldIncludeNode(node)) continue;
+      const clonedNode = node.cloneWithoutRelationships();
       idToNodeMap.set(clonedNode.id, clonedNode);
-    });
+    }
 
-    rootNode.traverse(originalNode => {
-      if (!shouldIncludeNode(originalNode)) return;
-      const clonedNode = idToNodeMap.get(originalNode.id);
+    for (const node of rootNode.traverse()) {
+      if (!shouldIncludeNode(node)) continue;
+      const clonedNode = idToNodeMap.get(node.id);
 
-      for (const dependency of originalNode._dependencies) {
+      for (const dependency of node._dependencies) {
         const clonedDependency = idToNodeMap.get(dependency.id);
         clonedNode.addDependency(clonedDependency);
       }
-    });
+    }
 
     if (!idToNodeMap.has(this.id)) throw new Error('Cloned graph missing node');
     return idToNodeMap.get(this.id);
   }
 
   /**
-   * Traverses all paths in the graph, calling iterator on each node visited. Decides which nodes to
-   * visit with the getNext function.
-   * @param {function(Node, Node[]): void} iterator
-   * @param {function(Node): Node[]} getNext
+   * Iterate over all connected nodes exactly once, in BFS order. By default the
+   * successor nodes are dependents, starting with this node, but which nodes to
+   * visit next can be overriden with the getNext function.
+   * @param {(node: Node) => Node[]} [getNext] Defaults to returning the dependents.
    */
-  _traversePaths(iterator, getNext) {
-    const stack = [[/** @type {Node} */(/** @type {BaseNode} */(this))]];
-    while (stack.length) {
-      /** @type {Node[]} */
-      // @ts-ignore - stack has length so it's guaranteed to have an item
-      const path = stack.shift();
-      const node = path[0];
-      iterator(node, path);
-
-      const nodesToAdd = getNext(node);
-      for (const nextNode of nodesToAdd) {
-        stack.push([nextNode].concat(path));
-      }
+  * traverse(getNext) {
+    for (const [, node] of this.traverseEntries(getNext)) {
+      yield node;
     }
   }
 
   /**
-   * Traverses all connected nodes exactly once, calling iterator on each. Decides which nodes to
-   * visit with the getNext function.
-   * @param {function(Node, Node[]): void} iterator
-   * @param {function(Node): Node[]} [getNext] Defaults to returning the dependents.
+   * Iterate over pairs of `[traversalPath, node]` exactly once per node, in BFS
+   * order. `traversalPath` is the shortest (though not necessarily unique) path
+   * from the root of the iteration to `node`. By default the successor nodes
+   * are dependents, starting with this node, but which nodes to visit next can
+   * be overriden with the getNext function.
+   * @param {(node: Node) => Node[]} [getNext] Defaults to returning the dependents.
+   * @return {IterableIterator<[Node[], Node]>}
    */
-  traverse(iterator, getNext) {
+  * traverseEntries(getNext) {
     if (!getNext) {
       getNext = node => node.getDependents();
     }
 
-    const visited = new Set();
-    const originalGetNext = getNext;
+    const visited = new Set([this.id]);
+    const queue = [[/** @type {Node} */(/** @type {BaseNode} */(this))]];
 
-    getNext = node => {
-      visited.add(node.id);
-      const allNodesToVisit = originalGetNext(node);
-      const nodesToVisit = allNodesToVisit.filter(nextNode => !visited.has(nextNode.id));
-      nodesToVisit.forEach(nextNode => visited.add(nextNode.id));
-      return nodesToVisit;
-    };
+    while (queue.length) {
+      /** @type {Node[]} */
+      // @ts-ignore - queue has length so it's guaranteed to have an item
+      const traversalPath = queue.shift();
+      const node = traversalPath[0];
+      yield [traversalPath, node];
 
-    this._traversePaths(iterator, getNext);
+      const nextNodes = getNext(node);
+      for (const nextNode of nextNodes) {
+        if (visited.has(nextNode.id)) continue;
+        visited.add(nextNode.id);
+
+        queue.push([nextNode, ...traversalPath]);
+      }
+    }
   }
 
   /**

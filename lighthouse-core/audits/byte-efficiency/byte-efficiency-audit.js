@@ -151,27 +151,27 @@ class UnusedBytes extends Audit {
     // Update all the transfer sizes to reflect implementing our recommendations
     /** @type {Map<string, number>} */
     const originalTransferSizes = new Map();
-    graph.traverse(node => {
-      if (node.type !== 'network') return;
+    for (const node of graph.traverse()) {
+      if (node.type !== 'network') continue;
       const result = resultsByUrl.get(node.record.url);
-      if (!result) return;
+      if (!result) continue;
 
       const original = node.record.transferSize;
       originalTransferSizes.set(node.record.requestId, original);
 
       const wastedBytes = result.wastedBytes;
       node.record.transferSize = Math.max(original - wastedBytes, 0);
-    });
+    }
 
     const simulationAfterChanges = simulator.simulate(graph, {label: afterLabel});
 
     // Restore the original transfer size after we've done our simulation
-    graph.traverse(node => {
-      if (node.type !== 'network') return;
+    for (const node of graph.traverse()) {
+      if (node.type !== 'network') continue;
       const originalTransferSize = originalTransferSizes.get(node.record.requestId);
-      if (originalTransferSize === undefined) return;
+      if (originalTransferSize === undefined) continue;
       node.record.transferSize = originalTransferSize;
-    });
+    }
 
     const savingsOnOverallLoad = simulationBeforeChanges.timeInMs - simulationAfterChanges.timeInMs;
     const savingsOnTTI = Interactive.getLastLongTaskEndTime(simulationBeforeChanges.nodeTimings) -

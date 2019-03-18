@@ -109,7 +109,9 @@ class RenderBlockingResources extends Audit {
       const {node, nodeTiming} = nodesByUrl[resource.tag.url];
 
       // Mark this node and all its dependents as deferrable
-      node.traverse(node => deferredNodeIds.add(node.id));
+      for (const deferredNode of node.traverse()) {
+        deferredNodeIds.add(deferredNode.id);
+      }
 
       // "wastedMs" is the download time of the network request, responseReceived - requestSent
       const wastedMs = Math.round(nodeTiming.duration);

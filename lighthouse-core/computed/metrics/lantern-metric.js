@@ -25,12 +25,12 @@ class LanternMetricArtifact {
     /** @type {Set<string>} */
     const scriptUrls = new Set();
 
-    dependencyGraph.traverse(node => {
-      if (node.type === BaseNode.TYPES.CPU) return;
-      if (node.record.resourceType !== NetworkRequest.TYPES.Script) return;
-      if (condition && !condition(node)) return;
+    for (const node of dependencyGraph.traverse()) {
+      if (node.type === BaseNode.TYPES.CPU) continue;
+      if (node.record.resourceType !== NetworkRequest.TYPES.Script) continue;
+      if (condition && !condition(node)) continue;
       scriptUrls.add(node.record.url);
-    });
+    }
 
     return scriptUrls;
   }

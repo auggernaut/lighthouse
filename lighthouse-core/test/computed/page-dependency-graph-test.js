@@ -152,8 +152,7 @@ describe('PageDependencyGraph computed artifact:', () => {
       addTaskEvents(0, 0, []);
 
       const graph = PageDependencyGraph.createGraph(traceOfTab, networkRecords);
-      const nodes = [];
-      graph.traverse(node => nodes.push(node));
+      const nodes = [...graph.traverse()];
 
       assert.equal(nodes.length, 4);
       assert.deepEqual(nodes.map(node => node.id), [1, 2, 3, 4]);
@@ -181,8 +180,7 @@ describe('PageDependencyGraph computed artifact:', () => {
       ]);
 
       const graph = PageDependencyGraph.createGraph(traceOfTab, networkRecords);
-      const nodes = [];
-      graph.traverse(node => nodes.push(node));
+      const nodes = [...graph.traverse()];
 
       const getIds = nodes => nodes.map(node => node.id);
       const getDependencyIds = node => getIds(node.getDependencies());
@@ -207,8 +205,7 @@ describe('PageDependencyGraph computed artifact:', () => {
       addTaskEvents(0, 0, []);
 
       const graph = PageDependencyGraph.createGraph(traceOfTab, networkRecords);
-      const nodes = [];
-      graph.traverse(node => nodes.push(node));
+      const nodes = [...graph.traverse()];
 
       assert.equal(nodes.length, 4);
       assert.deepEqual(nodes.map(node => node.id), [1, 2, 3, 4]);
@@ -246,8 +243,7 @@ describe('PageDependencyGraph computed artifact:', () => {
       ]);
 
       const graph = PageDependencyGraph.createGraph(traceOfTab, networkRecords);
-      const nodes = [];
-      graph.traverse(node => nodes.push(node));
+      const nodes = [...graph.traverse()];
 
       const getDependencyIds = node => node.getDependencies().map(node => node.id);
 
@@ -271,8 +267,7 @@ describe('PageDependencyGraph computed artifact:', () => {
       addTaskEvents(0, 0, []);
 
       const graph = PageDependencyGraph.createGraph(traceOfTab, networkRecords);
-      const nodes = [];
-      graph.traverse(node => nodes.push(node));
+      const nodes = [...graph.traverse()];
 
       assert.equal(nodes.length, 3);
       assert.equal(nodes[0].id, 1);
