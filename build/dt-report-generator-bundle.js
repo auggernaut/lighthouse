@@ -7,13 +7,36 @@
 
 const browserify = require('browserify');
 const fs = require('fs');
+const rimraf = require('rimraf');
 
 const distDir = __dirname + '/../dist';
-const outFile = `${distDir}/report-generator.js`;
+const bundleOutFile = `${distDir}/report-generator.js`;
+const resourcesOutDir = `${distDir}/dt-resources`;
 const generatorFilename = `./lighthouse-core/report/report-generator.js`;
-browserify(generatorFilename, {standalone: 'ReportGenerator'})
-  .transform('brfs')
+const htmlReportAssets = require('../lighthouse-core/report/html/html-report-assets.js');
+
+/**
+ * @param {string} name
+ * @param {string} content
+ */
+function cachedResource(name, content) {
+  // eslint-disable-next-line no-control-regex
+  const escaped = content.replace(/[^\x00-\x7F]/g, c => '\\\\u' + c.charCodeAt(0).toString(16));
+  fs.writeFileSync(`${resourcesOutDir}/${name}`, escaped);
+}
+
+// For cached resources. Contents must be ascii.
+rimraf.sync(resourcesOutDir);
+fs.mkdirSync(resourcesOutDir);
+cachedResource('report.js', htmlReportAssets.REPORT_JAVASCRIPT);
+cachedResource('report.css', htmlReportAssets.REPORT_CSS);
+cachedResource('template.html', htmlReportAssets.REPORT_TEMPLATE);
+cachedResource('templates.html', htmlReportAssets.REPORT_TEMPLATES);
+
+const pathToReportAssets = require.resolve('../clients/devtools-report-assets.js');
+browserify(generatorFilename, {standalone: 'Lighthouse.ReportGenerator'})
+  .require(pathToReportAssets, {expose: './html/html-report-assets'})
   .bundle((err, src) => {
     if (err) throw err;
-    fs.writeFileSync(outFile, src.toString());
+    fs.writeFileSync(bundleOutFile, src.toString());
   });
