@@ -112,10 +112,9 @@ class DOM {
 
   /**
    * @param {string} text
-   * @param {{rating?: string}} metadata
    * @return {Element}
    */
-  convertMarkdownLinkSnippets(text, metadata = {}) {
+  convertMarkdownLinkSnippets(text) {
     const element = this.createElement('span');
 
     // Split on markdown links (e.g. [some link](https://...)).
@@ -135,9 +134,6 @@ class DOM {
         if (url.origin === DEVELOPERS_GOOGLE_ORIGIN) {
           url.searchParams.set('utm_source', 'lighthouse');
           url.searchParams.set('utm_medium', this._lighthouseChannel);
-          if (metadata.rating) {
-            url.searchParams.set('utm_content', metadata.rating);
-          }
         }
 
         const a = this.createElement('a');

@@ -81,14 +81,9 @@ class CategoryRenderer {
 
     const titleEl = this.dom.find('.lh-audit__title', auditEl);
     titleEl.appendChild(this.dom.convertMarkdownCodeSnippets(audit.result.title));
-    let ratingForUtmParam = Util.calculateRating(audit.result.score, scoreDisplayMode);
-    if (audit.result.scoreDisplayMode === 'notApplicable') {
-      ratingForUtmParam = 'notApplicable';
-    }
+
     this.dom.find('.lh-audit__description', auditEl)
-        .appendChild(this.dom.convertMarkdownLinkSnippets(audit.result.description, {
-          rating: ratingForUtmParam,
-        }));
+        .appendChild(this.dom.convertMarkdownLinkSnippets(audit.result.description));
 
     const header = /** @type {HTMLDetailsElement} */ (this.dom.find('details', auditEl));
     if (audit.result.details) {
