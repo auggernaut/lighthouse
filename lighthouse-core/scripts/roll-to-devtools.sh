@@ -44,5 +44,5 @@ echo -e "\033[32m ✓\033[39m Report renderer files copied."
 cp -pPR "$lh_bg_js" "$lh_worker_dir/lighthouse-dt-bundle.js"
 echo -e "\033[96m ✓\033[39m (Potentially stale) lighthouse-dt-bundle copied."
 
-# copy report generator + cached resources
+# copy report generator + cached resources into $fe_lh_dir
 cp -r dist/dt-resources/ $fe_lh_dir
