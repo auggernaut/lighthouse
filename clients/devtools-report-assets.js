@@ -5,9 +5,15 @@
  */
 'use strict';
 
+/**
+ * @fileoverview Instead of loading report assets form the filesystem, in Devtools we must load
+ * them via Runtime.cachedResources. We use this module to shim ./html/html-report-assets
+ * in Devtools.
+ */
+
 /* global Runtime */
 
-// @ts-ignore: Runtime exists in devtools.
+// @ts-ignore: Runtime exists in Devtools.
 const cachedResources = Runtime.cachedResources;
 
 module.exports = {

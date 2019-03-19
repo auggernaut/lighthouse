@@ -15,25 +15,27 @@ const generatorFilename = `./lighthouse-core/report/report-generator.js`;
 const htmlReportAssets = require('../lighthouse-core/report/html/html-report-assets.js');
 
 /**
+ * Used to save cached resources (Runtime.cachedResources). Content must be converted to ascii.
  * @param {string} name
  * @param {string} content
  */
-function cachedResource(name, content) {
+function convertToAsciiAndWriteFile(name, content) {
   // eslint-disable-next-line no-control-regex
   const escaped = content.replace(/[^\x00-\x7F]/g, c => '\\\\u' + c.charCodeAt(0).toString(16));
   fs.writeFileSync(`${distDir}/${name}`, escaped);
 }
 
-// For cached resources. Contents must be ascii.
 rimraf.sync(distDir);
 fs.mkdirSync(distDir);
-cachedResource('report.js', htmlReportAssets.REPORT_JAVASCRIPT);
-cachedResource('report.css', htmlReportAssets.REPORT_CSS);
-cachedResource('template.html', htmlReportAssets.REPORT_TEMPLATE);
-cachedResource('templates.html', htmlReportAssets.REPORT_TEMPLATES);
+
+convertToAsciiAndWriteFile('report.js', htmlReportAssets.REPORT_JAVASCRIPT);
+convertToAsciiAndWriteFile('report.css', htmlReportAssets.REPORT_CSS);
+convertToAsciiAndWriteFile('template.html', htmlReportAssets.REPORT_TEMPLATE);
+convertToAsciiAndWriteFile('templates.html', htmlReportAssets.REPORT_TEMPLATES);
 
 const pathToReportAssets = require.resolve('../clients/devtools-report-assets.js');
 browserify(generatorFilename, {standalone: 'Lighthouse.ReportGenerator'})
+  // Shims './html/html-report-assets' to resolve to devtools-report-assets.
   .require(pathToReportAssets, {expose: './html/html-report-assets'})
   .bundle((err, src) => {
     if (err) throw err;
