@@ -125,7 +125,6 @@ class DOM {
       const [preambleText, linkText, linkHref] = parts.splice(0, 3);
       element.appendChild(this._document.createTextNode(preambleText));
 
-
       // Append link if there are any.
       if (linkText && linkHref) {
         const url = new URL(linkHref);
