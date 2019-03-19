@@ -120,10 +120,7 @@ describe('DOM', () => {
     it('appends utm params to the URLs with https://developers.google.com origin', () => {
       const text = '[Learn more](https://developers.google.com/web/tools/lighthouse/audits/description).';
 
-      let result = dom.convertMarkdownLinkSnippets(text);
-      assert.equal(result.innerHTML, '<a rel="noopener" target="_blank" href="https://developers.google.com/web/tools/lighthouse/audits/description?utm_source=lighthouse&amp;utm_medium=someChannel">Learn more</a>.');
-
-      result = dom.convertMarkdownLinkSnippets(text);
+      const result = dom.convertMarkdownLinkSnippets(text);
       assert.equal(result.innerHTML, '<a rel="noopener" target="_blank" href="https://developers.google.com/web/tools/lighthouse/audits/description?utm_source=lighthouse&amp;utm_medium=someChannel">Learn more</a>.');
     });
 
