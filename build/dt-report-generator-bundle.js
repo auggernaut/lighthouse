@@ -7,9 +7,10 @@
 
 const browserify = require('browserify');
 const fs = require('fs');
+const path = require('path');
 const rimraf = require('rimraf');
 
-const distDir = __dirname + '/../dist/dt-resources';
+const distDir = path.join(__dirname, '..', 'dist', 'dt-resources');
 const bundleOutFile = `${distDir}/report-generator.js`;
 const generatorFilename = `./lighthouse-core/report/report-generator.js`;
 const htmlReportAssets = require('../lighthouse-core/report/html/html-report-assets.js');
